@@ -193,13 +193,7 @@ define tomcat::instance::config(
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
-      content => ".include /usr/lib/systemd/system/tomcat.service
-[Service]
-UMask=${umask}
-LimitNOFILE=${systemd_nofile}
-Environment=\"SERVICE_NAME=tomcat-${name}\"
-EnvironmentFile=-/etc/sysconfig/tomcat-${name}
-",
+      content => template('tomcat/tomcat.service.erb'),
     }
     ~> Exec['systemctl-daemon-reload']
     ~> Tomcat::Instance::Service[$title]
@@ -330,6 +324,17 @@ EnvironmentFile=-/etc/sysconfig/tomcat-${name}
 
     if $::operatingsystem == 'Debian' and $::tomcat::params::systemd {
       include ::systemd
+
+      file { "/usr/lib/systemd/system/tomcat-${name}.service":
+        ensure  => file,
+        owner   => 'root',
+        group   => 'root',
+        mode    => '0644',
+        content => template('tomcat/tomcat.service.erb'),
+      }
+      ~> Exec['systemctl-daemon-reload']
+      ~> Tomcat::Instance::Service[$title]
+
       File["/etc/init.d/tomcat-${name}"]
       ~> Exec['systemctl-daemon-reload']
       ~> Tomcat::Instance::Service[$title]

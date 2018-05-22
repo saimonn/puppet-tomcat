@@ -1,0 +1,6 @@
+.include /usr/lib/systemd/system/tomcat.service
+[Service]
+UMask=<%= @umask %>
+LimitNOFILE=<%= @systemd_nofile %>
+Environment="SERVICE_NAME=tomcat-<%= @tomcat_name %>"
+EnvironmentFile=-/etc/sysconfig/tomcat-<%= @tomcat_name %>
